@@ -1,14 +1,9 @@
 import os
 import logging
 from dotenv import load_dotenv
-from rich.console import Console
-from rich.progress import track
 
 import discord
 from discord.ext import commands
-
-# rich.console
-console = Console()
 
 # LOGGING
 logger = logging.getLogger('discord')
@@ -27,7 +22,7 @@ bot = commands.Bot(command_prefix='!')
 # when the bot boots
 @bot.event
 async def on_ready():
-	console.print(
+	print(
 		f'{bot.user.name} has connected!', style="bold white", justify="center"
 	)
 
@@ -54,15 +49,5 @@ async def clear(ctx, name):
 @bot.event
 async def on_command_error(ctx, error):
 	await ctx.send(f'ERROR: Try !help ({error})')
-
-# BUG: checks for user input 'hello'; stops
-#      the code from checking for user commands (!)
-"""
-@bot.event
-async def on_message(message):
-	print(f'{message.channel}: {message.author}: {message.author.name}: {message.content}')
-	if 'hello' in message.content.lower():
-		await message.channel.send(f'Hi, {message.author.name}!')
-"""
 
 bot.run(TOKEN)
