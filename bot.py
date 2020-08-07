@@ -36,6 +36,11 @@ def get_channel_id(arg):
 			channel_id = CHANNELS[channel]
 	return channel_id
 
+# runs through all channel names and returns the channel ids with them
+def all_channel_ids():
+	for channel in CHANNELS:
+		return CHANNELS[channel]
+
 # checks if the arg is in channels dict. if so it returns the channel
 def channel_name_check(channels, arg):
 	for channel in channels:
@@ -80,12 +85,26 @@ async def channel_purge(ctx, *args):
 		channel_id = get_channel_id(arg)
 		channel = bot.get_channel(int(channel_id))
 		if verbose_check:
-			purged = await channel.purge(limit=100)
+			purged = await channel.purge(limit=200)
 			await ctx.send(f'Purged {len(purged)} message(s) from {channel}')
 			verbose_check = False
 		else:
 			await channel.purge(limit=100)
 		channel_check = False
+
+# TODO command that deletes messages by user
+@bot.command(name='delete', help='* Deletes a users messages')
+@commands.has_role('Owner' or 'Admin')
+async def delete_user_message(ctx, channel, name):
+	channel_id = get_channel_id(channel)
+	channel = bot.get_channel(int(channel_id))
+	# nested check function for purge
+	# doesn't actually recognize name in messages and deletes nothing
+	# it will delete bot messages with bot.user instead of name
+	def check_user(m):
+		return m.author == name
+	purged = await channel.purge(check=check_user)
+	await ctx.send(f'{len(purged)} of {name}\'s message(s) deleted!') 
 
 # command that prints total / online / offline members
 @bot.command(name='members', help='* Prints total users')
