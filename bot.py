@@ -12,13 +12,35 @@ handler = logging.FileHandler(filename='err.log', encoding='utf-8')
 handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
 logger.addHandler(handler)
 
+# variables are stored in a .env file for obscurity
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 GUILD = os.getenv('DISCORD_GUILD')
 GUILD_ID = os.getenv('DISCORD_GUILD_ID')
-STAFF_ROLES = ('Owner', 'Admin')
+STAFF_ROLES = ( ### ADD NEW STAFF ROLES HERE ###
+	'Owner',
+	'Admin'
+)
+CHANNELS = { ### ADD NEW CHANNELS HERE ###
+	'general': 740639148041306155,
+	'test': 740667812615290972
+}
 
 bot = commands.Bot(command_prefix='!')
+
+# returns channel id # from channel name REQUIRES updating CHANNELS dict
+# ex. bot.get_channel() which requires the channel id
+def get_channel_id(arg):
+	for channel in CHANNELS:
+		if channel == arg:
+			channel_id = CHANNELS[channel]
+	return channel_id
+
+# checks if the arg is in channels dict. if so it returns the channel
+def channel_name_check(channels, arg):
+	for channel in channels:
+		if channel == arg:
+			return channel
 
 # when the bot boots
 @bot.event
@@ -40,13 +62,32 @@ async def on_member_join(member):
 async def add(ctx, a: int, b: int):
 	await ctx.send(a + b)
 
-# TODO make a command that clears chat
-@bot.command(name='clear', help='* Clears messages.')
+# command that purges chat by channel name
+@bot.command(name='purge', help='* Purges all messages from a channel.')
 @commands.has_role('Owner')
-async def clear(ctx, name):
-	print('clear')
+async def channel_purge(ctx, *args):
+	channel_check = False
+	verbose_check = False
+	# added command line args for this command
+	for arg in args:
+		if arg == channel_name_check(CHANNELS, arg):
+			channel_check = True
+		# makes the command verbose
+		if arg == '-v':
+			verbose_check = True
 
-# TODO command that prints total / online / offline users
+	while channel_check:
+		channel_id = get_channel_id(arg)
+		channel = bot.get_channel(int(channel_id))
+		if verbose_check:
+			purged = await channel.purge(limit=100)
+			await ctx.send(f'Purged {len(purged)} message(s) from {channel}')
+			verbose_check = False
+		else:
+			await channel.purge(limit=100)
+		channel_check = False
+
+# command that prints total / online / offline members
 @bot.command(name='members', help='* Prints total users')
 @commands.has_role('Owner' or 'Admin')
 async def members_count(ctx):
@@ -59,7 +100,7 @@ async def members_count(ctx):
 			online += 1
 		if str(m.status) == 'offline':
 			offline += 1
-
+	
 	await ctx.send(
 		f'```Total: {guild.member_count}\nOnline: {online}\nOffline: {offline}```'
 	)
