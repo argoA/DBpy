@@ -36,11 +36,6 @@ def get_channel_id(arg):
 			channel_id = CHANNELS[channel]
 	return channel_id
 
-# runs through all channel names and returns the channel ids with them
-def all_channel_ids():
-	for channel in CHANNELS:
-		return CHANNELS[channel]
-
 # checks if the arg is in channels dict. if so it returns the channel
 def channel_name_check(channels, arg):
 	for channel in channels:
@@ -68,6 +63,7 @@ async def add(ctx, a: int, b: int):
 	await ctx.send(a + b)
 
 # command that purges chat by channel name
+# probably a better way to do this function.
 @bot.command(name='purge', help='* Purges all messages from a channel.')
 @commands.has_role('Owner')
 async def channel_purge(ctx, *args):
@@ -95,16 +91,23 @@ async def channel_purge(ctx, *args):
 # TODO command that deletes messages by user
 @bot.command(name='delete', help='* Deletes a users messages')
 @commands.has_role('Owner' or 'Admin')
-async def delete_user_message(ctx, channel, name):
+async def delete_user_message(ctx, name, channel):
 	channel_id = get_channel_id(channel)
 	channel = bot.get_channel(int(channel_id))
-	# nested check function for purge
-	# doesn't actually recognize name in messages and deletes nothing
-	# it will delete bot messages with bot.user instead of name
-	def check_user(m):
-		return m.author == name
-	purged = await channel.purge(check=check_user)
-	await ctx.send(f'{len(purged)} of {name}\'s message(s) deleted!') 
+	#messages = discord.Message
+	deleted = 0
+	# for every message in channel history
+	async for message in channel.history(limit=100):
+		# author of message = message.author.name
+		author = message.author.name
+		# if supplied name input is authors name
+		if name == author:
+			await message.delete()
+			# TODO make this actually delete the users message.
+			deleted += 1
+			#channel.delete_messages(message.author.name)
+
+	await ctx.send(f'Deleted {deleted} of {name}\'s message(s)!') 
 
 # command that prints total / online / offline members
 @bot.command(name='members', help='* Prints total users')
