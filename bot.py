@@ -88,24 +88,20 @@ async def channel_purge(ctx, *args):
 			await channel.purge(limit=100)
 		channel_check = False
 
-# TODO command that deletes messages by user
+# command that deletes messages by user
 @bot.command(name='delete', help='* Deletes a users messages')
 @commands.has_role('Owner' or 'Admin')
 async def delete_user_message(ctx, name, channel):
 	channel_id = get_channel_id(channel)
 	channel = bot.get_channel(int(channel_id))
-	#messages = discord.Message
 	deleted = 0
 	# for every message in channel history
 	async for message in channel.history(limit=100):
-		# author of message = message.author.name
 		author = message.author.name
 		# if supplied name input is authors name
 		if name == author:
 			await message.delete()
-			# TODO make this actually delete the users message.
 			deleted += 1
-			#channel.delete_messages(message.author.name)
 
 	await ctx.send(f'Deleted {deleted} of {name}\'s message(s)!') 
 
