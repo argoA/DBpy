@@ -63,6 +63,7 @@ async def add(ctx, a: int, b: int):
 	await ctx.send(a + b)
 
 # command that purges chat by channel name
+# probably a better way to do this function.
 @bot.command(name='purge', help='* Purges all messages from a channel.')
 @commands.has_role('Owner')
 async def channel_purge(ctx, *args):
@@ -80,12 +81,29 @@ async def channel_purge(ctx, *args):
 		channel_id = get_channel_id(arg)
 		channel = bot.get_channel(int(channel_id))
 		if verbose_check:
-			purged = await channel.purge(limit=100)
+			purged = await channel.purge(limit=200)
 			await ctx.send(f'Purged {len(purged)} message(s) from {channel}')
 			verbose_check = False
 		else:
 			await channel.purge(limit=100)
 		channel_check = False
+
+# command that deletes messages by user
+@bot.command(name='delete', help='* Deletes a users messages')
+@commands.has_role('Owner' or 'Admin')
+async def delete_user_message(ctx, name, channel):
+	channel_id = get_channel_id(channel)
+	channel = bot.get_channel(int(channel_id))
+	deleted = 0
+	# for every message in channel history
+	async for message in channel.history(limit=100):
+		author = message.author.name
+		# if supplied name input is authors name
+		if name == author:
+			await message.delete()
+			deleted += 1
+
+	await ctx.send(f'Deleted {deleted} of {name}\'s message(s)!') 
 
 # command that prints total / online / offline members
 @bot.command(name='members', help='* Prints total users')
