@@ -11,7 +11,6 @@ class Admin(commands.Cog):
 	async def ping(self, ctx):
 		await ctx.send(f'Pong! {round(self.bot.latency * 1000)}ms')
 
-
 	@commands.command(help='Deletes a user\'s message(s)', usage='<limit> [-v]')
 	@checks.is_server_admin()
 	async def delete(self, ctx, member : discord.Member, limit=5, verbose=''):
@@ -49,7 +48,6 @@ class Admin(commands.Cog):
 			if (user.name, user.discriminator) == (member_name, member_discriminator):
 				await ctx.guild.unban(user)
 				print(f'{user.name} was unbanned.')
-				return
 
 def setup(bot):
 	bot.add_cog(Admin(bot))
